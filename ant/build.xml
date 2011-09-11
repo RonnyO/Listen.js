@@ -1,0 +1,26 @@
+<project name="Listen.js Build" basedir=".">
+
+	<!--
+         This is the build script for the listen project
+         @author: Nir Geier
+     -->
+
+	<!-- Set the timestamp formats -->
+	<tstamp>
+		<format property="TSTAMP" pattern="_HHmmss" />
+		<format property="build.time" pattern="dd/MM/yyyy hh:mm:ss" />
+	</tstamp>
+
+	<!-- import required stuff -->
+	<property file="build.properties" />
+	<import file="${basedir}\macros.xml" />
+	<import file="${basedir}\taskdef.xml" />
+	<import file="${basedir}\targets.xml" />
+
+
+	<target name="build" description="Build the project">
+		<!-- Here are the targets that make the build -->
+		<antcall target="-Verify with jshint" inheritall="true" inheritrefs="true" />
+	</target>
+
+</project>
