@@ -1,4 +1,4 @@
-<project name="Listen.js Build" basedir=".">
+<project name="Listen.js Build" basedir="../">
 
 	<!--
          This is the build script for the listen project
@@ -12,15 +12,17 @@
 	</tstamp>
 
 	<!-- import required stuff -->
-	<property file="build.properties" />
-	<import file="${basedir}\macros.xml" />
-	<import file="${basedir}\taskdef.xml" />
-	<import file="${basedir}\targets.xml" />
+	<property file="${basedir}\ant\build.properties" />
+	<import file="${basedir}\ant\macros.xml" />
+	<import file="${basedir}\ant\taskdef.xml" />
+	<import file="${basedir}\ant\targets.xml" />
 
 
 	<target name="build" description="Build the project">
 		<!-- Here are the targets that make the build -->
-		<antcall target="-Verify with jshint" inheritall="true" inheritrefs="true" />
+		<antcall target="-Verify with jshint"
+		         inheritall="true"
+		         inheritrefs="true" />
 	</target>
 
 </project>

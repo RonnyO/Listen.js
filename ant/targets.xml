@@ -1,35 +1,64 @@
-<project name="Targets for Listen.js">
+<project name="Targets for Listen.js" basedir="../">
 
-	<!-- Verify the Selected js files with jshint -->
-	<target name="-Verify with jshint" description="Verify with jshint">
-		<!-- Loop over the required js files -->
-		<foreach target="-verifyJS" param="fileName">
-			<path>
-				<fileset dir="${basedir}/../js">
-					<include name="**/*demo*" />
-					<exclude name="**/*jquery*.js" />
-					<exclude name="**/*.min.js" />
-				</fileset>
-			</path>
-		</foreach>
+    <!-- Verify the Selected js files with jshint -->
+    <target name="-Verify with jshint" description="Verify with jshint">
+        <!-- Loop over the required js files -->
+        <foreach target="-verifyJS" param="fileName">
+            <path>
+                <fileset dir="${basedir}/js">
+                    <include name="**/*demo*"/>
+                    <exclude name="**/*jquery*.js"/>
+                    <exclude name="**/*.min.js"/>
+                </fileset>
+            </path>
+        </foreach>
 
-	</target>
+    </target>
 
-	<!-- Execute the jhint on the given file -->
-	<target name="-verifyJS">
-		<!--echo>Processing: ${fileName}</echo-->
-		<apply executable="java" parallel="true" failonerror="false" resultproperty="jsError" outputproperty="parseMessage">
-			<fileset file="${fileName}" />
-			<arg value="-jar" />
-			<arg path="${tool.rhino}" />
-			<arg path="${tool.jshint}" />
-			<srcfile />
-			<arg value="${tool.jshint.opts}" />
-		</apply>
-		
-		<!-- Check to see if we have errors or not -->
-		 
-		<echo>[ ${fileName} ] > ${parseMessage}</echo>
-	</target>
+    <!-- Execute the jhint on the given file -->
+    <target name="-verifyJS">
+        <!--echo>Processing: ${fileName}</echo-->
+        <apply executable="java"
+               parallel="true"
+               failonerror="false"
+               resultproperty="jsError"
+               outputproperty="parseMessage">
+            <fileset file="${fileName}"/>
+            <arg value="-jar"/>
+            <arg path="${tool.rhino}"/>
+            <arg path="${tool.jshint}"/>
+            <srcfile/>
+            <arg value="${tool.jshint.opts}"/>
+        </apply>
+
+        <!-- Check to see if we have errors or not -->
+        <echo>[ ${fileName} ] > ${parseMessage}</echo>
+    </target>
+
+    <target name="Generate jsdoc" description="">
+        <echo>${jsdoc-toolkit.dir}</echo>
+
+        <echo>Copying js files that will be documented</echo>
+        <delete dir="${basedir}/jsdoc"/>
+        <mkdir dir="${basedir}/jsdoc"/>
+        <copy todir="${basedir}/jsdoc/srcFiles">
+            <fileset dir="${basedir}/js">
+                <exclude name="**jquery**"/>
+            </fileset>
+        </copy>
+        <jsdoctoolkit jsdochome="${jsdoc-toolkit.dir}"
+                      template="${jdoc.template}"
+                      outputdir="${basedir}/jsdoc"
+                      inputdir="${basedir}/jsdoc/srcFiles"
+                      includeundocumented="true"
+                      includeunderscored="true"
+                      includeprivate="true"
+                      verbose="true">
+            <arg name="-p"/>
+            <arg name="-a"/>
+
+        </jsdoctoolkit>
+
+    </target>
 
 </project>

@@ -1,19 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="macrodef">
+<project name="macrodef" basedir="../">
 
-	<macrodef name="updateBuildNumber" description="Update the build number and time stamp">
-		<attribute name="file.buildNumber" default="${file.buildNumber}" />
-		<sequential>
-			<!-- Verify that the log folder exists. If not - create it -->
-			<echo message="Updating build number ..." />
+    <macrodef name="updateBuildNumber" description="Update the build number and time stamp">
+        <attribute name="file.buildNumber" default="${file.buildNumber}"/>
+        <sequential>
+            <!-- Verify that the log folder exists. If not - create it -->
+            <echo message="Updating build number ..."/>
 
-			<!-- Update the build number -->
-			<propertyfile file="@{file.buildNumber}" comment="Build version and build date">
-				<entry key="build.number" type="int" operation="+" value="1" pattern="0000" />
-				<!--entry key="build.date" type="date" value="now" pattern="DD.MM.yyyy HH:mm" /-->
-				<entry key="build.user" value="${user.name}" />
-			</propertyfile>
+            <!-- Update the build number -->
+            <propertyfile file="@{file.buildNumber}" comment="Build version and build date">
+                <entry key="build.number" type="int" operation="+" value="1" pattern="0000"/>
+                <!--entry key="build.date" type="date" value="now" pattern="DD.MM.yyyy HH:mm" /-->
+                <entry key="build.user" value="${user.name}"/>
+            </propertyfile>
 
-		</sequential>
-	</macrodef>
+        </sequential>
+    </macrodef>
 </project>

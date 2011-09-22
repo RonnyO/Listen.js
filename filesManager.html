@@ -23,7 +23,57 @@
         <legend>Files list</legend>
         <ul id="dir-tree"></ul>
     </fieldset>
+    <script>
+        $(document).ready(
+                function() {
+                    return;
+                    document.querySelector('#folderInput').addEventListener("change",
+                            function(e) {
 
+                                var reader = new FileReader();
+                                var file = e.target.files[0];
+                                console.log(file);
+                                var bytes = reader.readAsArrayBuffer(file);
+
+                                console.log(bytes);
+                                var blob = bytes.slice(file.length - 128, 3);
+                                console.log(reader.readAsBinaryString(blob));
+
+                                /*
+                                 reader.onerror = function(e) {
+                                 console.log(e);
+                                 }
+                                 reader.onload = function(e) {
+
+                                 var bytes = this.result;
+
+                                 var start = bytes.length - 128;
+                                 var blob = bytes.slice(start, 3);
+
+                                 console.log(reader.readAsBinaryString(blob));
+                                 return;
+
+                                 // "TAG" starts at byte -128 from EOF.
+                                 // See http://en.wikipedia.org/wiki/ID3
+                                 if (dv.getString(3, dv.length - 128) == 'TAG') {
+                                 var title = dv.getString(30, dv.tell());
+                                 var artist = dv.getString(30, dv.tell());
+                                 var album = dv.getString(30, dv.tell());
+                                 var year = dv.getString(4, dv.tell());
+
+                                 console.log(title, artist, album, year);
+
+                                 } else {
+                                 // no ID3v1 data found.
+                                 }
+                                 };
+                                 //reader.readAsArrayBuffer(e.target.files[0]);
+                                 */
+                            }
+                    );
+                });
+
+    </script>
 </div>
 </body>
 </html>

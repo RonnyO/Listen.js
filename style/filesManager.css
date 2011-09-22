@@ -1,13 +1,22 @@
+html {
+}
+
 body {
     font-family: Consolas;
     font-size: 14px;
     width: 960px;
     margin: 0 auto;
-    background: url('../images/HTML5_Logo_512.png') center no-repeat;
+    /*    background: url('../images/HTML5_Logo_512.png') center no-repeat;*/
 }
 
 .pageWrap {
     padding: 50px;
+}
+
+fieldset {
+    border: 1px solid black;
+    border-radius: 5px;
+    padding: 5px;
 }
 
 /**

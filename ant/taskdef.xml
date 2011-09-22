@@ -1,13 +1,13 @@
-<project name="taskdef" basedir=".">
+<project name="taskdef" basedir="../">
 
-	<!-- Set ant classpath -->
-	<path id="jars.claspath">
-		<fileset dir="${basedir}/lib">
-			<include name="**/*.jar" />
-		</fileset>
-	</path>
+    <!-- Set ant classpath -->
+    <path id="jars.claspath">
+        <fileset dir="${basedir}/ant/lib">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
 
-	<!-- Add needed tasks -->
-	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="jars.claspath" />
-
+    <!-- Add needed tasks -->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="jars.claspath"/>
+    <taskdef name="jsdoctoolkit" classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit" classpathref="jars.claspath"/>
 </project>
