@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<!--
+    http://www.google.co.il/search?gcx=c&sourceid=chrome&ie=UTF-8&q=jsfillde+workers
+    https://github.com/rwldrn/jquery-hive
+    http://blogs.msdn.com/b/davrous/archive/2011/07/15/introduction-to-the-html5-web-workers-the-javascript-multithreading-approach.aspx
+    http://david.blob.core.windows.net/html5/HelloWebWorkers_EN.htm
+    http://www.html5rocks.com/en/tutorials/workers/basics/
+    http://slides.html5rocks.com/#web-workers
+    http://weblog.bocoup.com/javascript-web-workers-from-basics-to-jquery-hive-part-i
+    http://www.whatwg.org/specs/web-apps/current-work/multipage/workers.html
+    http://www.sitepoint.com/javascript-shared-web-workers-html5/
+-->
+
+<head>
+    <meta charset="utf-8">
+    <title>WebWorkers, FileAPI</title>
+    <!--link href='http://fonts.googleapis.com/css?family=Crimson+Text:regular,600,bold' rel='stylesheet' type='text/css'-->
+    <link rel="stylesheet" href="css/main.css">
+    <link href="css/shThemeDefault.css" rel="stylesheet" type="text/css"/>
+
+    <script src="js/shCore.js" type="text/javascript"></script>
+    <script src="js/shAutoloader.js" type="text/javascript"></script>
+    <script src="js/shBrushJScript.js" type="text/javascript"></script>
+    <script src="js/shBrushXml.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+<!-- Any section element inside of this container is displayed as a slide -->
+<div id="main">
+
+<section>
+    <h2 class="workers">WebWorkers</h2>
+    <ol class="workers">
+        <li>Dedicated Workers</li>
+        <li>Inline Workers</li>
+        <li>Shared Workers</li>
+    </ol>
+    <br/>
+
+    <h2 class="files">FileAPI</h2>
+    <ol class="files">
+        <li>File API (Local)</li>
+        <li>File System API</li>
+    </ol>
+
+</section>
+
+<section>
+    <h1 class="workers">Workers</h1>
+</section>
+
+<section>
+    <h3>"Old" behaviour</h3>
+    <ul>
+        <li>JS code is executed in a single thread (sequence)</li>
+        <li>Workarounds : asynchronously code.</li>
+        <ul class="innerList">
+            <li>ajax (XHR/XHR2)</li>
+            <li>events</li>
+            <li class="strike">setInteval (Not recommended, Bad coding !!!)</li>
+            <li>setTimeout</li>
+            <li>and more</li>
+        </ul>
+    </ul>
+</section>
+
+<section>
+    <h3>Workers</h3>
+    <ul>
+        <li>Workers code is written in a <b>separate</b> JS file.</li>
+        <li>Web workers operate independently of the browser UI thread.</li>
+        <li>Workers allow web applications to run non-blocking scripts parallel to the main page.</li>
+        <li>When creating worker - new thread is created and source is downloaded asynchronously.</li>
+        <li>Workers can only pass data in and out of a thread through the <code>postMessage()</code> API and
+            onMessage Event.
+        </li>
+        <li>The Workers API is originally based on the now deprecated Gears WorkerPool API</li>
+        <li>Creates an OS level script execution environment that is capable of scaling across multiple cores when
+            present
+        </li>
+        <li>Workers are not intended to be used in large numbers.too many workers will cause a loss of response in
+            the main window.
+        </li>
+        <li>If source not found -> 404 = silent failure</li>
+
+    </ul>
+</section>
+
+<section>
+    <h3>Workers Environment (1)</h3>
+
+    <p class="dark">Features Available to Workers:</p>
+    <ul>
+        <li>The <span class="code">navigator</span> object</li>
+        <li>The <span class="code">location</span> object (read-only)</li>
+        <li><span class="code">XMLHttpRequest</span> (XHR/XHR2)</li>
+        <li><span class="code">setTimeout()/clearTimeout()</span></li>
+        <li><span class="code">setInterval()/clearInterval()</span></li>
+        <li>The <span class="code">Application Cache</span></li>
+        <li><span class="code">importScripts()</span> (load external scripts to worker env)</li>
+    </ul>
+</section>
+
+<section>
+    <h3>Workers Environment (2)</h3>
+
+    <p class="dark">Features Un-Available to Workers:</p>
+
+    <ul>
+        <li>The <span class="code"><b>DOM</b></span></li>
+        <li>The <span class="code">window</span> object<br/>
+            = No access global variables or functions within the page
+        </li>
+        <li>The <span class="code">document</span> object</li>
+        <li>The <span class="code">parent</span> object</li>
+
+    </ul>
+</section>
+
+<section>
+    <h3>Worker Code (Main Window)</h3>
+
+        <pre class="brush: javascript;">
+        var worker;
+
+        function initWorker(){
+
+            // Creating the worker
+            worker = new Worker( 'path_to_worker_file' );
+
+            // Communicating With a Dedicated Web Worker
+            // several alternative to "register" the onmessage
+            worker.onmessage = function( e ) { ... };
+
+            // same as above: using DOM2 events (addEventListener)
+            worker.addEventListener('message', function(e) { ... }, false);
+
+            // The handler event is passed an object with 3 properties:
+            // filename: the name of the script which caused the error;
+            // lineno  : the line number where the error occurred; and
+            // message : a description of the error.
+            worker.onerror = function(e) {
+                console.log("Error: ", e.filename, e.lineno, e.message);
+            };
+
+            // Starting the worker by sending a first message
+            worker.postMessage("html5Fest");
+
+            // In some browser JSON is supported as well
+            worker.postMessage( { msg : 'html5Fest', action : 'start'});
+
+            // "killing" the worker
+            worker.terminate();
+            }
+        </pre>
+
+</section>
+
+<section>
+    <h3>Worker Code (Worker file)</h3>
+
+            <pre class="brush: javascript;">
+            // In the worker file
+            // we need to implement the onmessage function
+
+            // Web Workers can also communicate between each others using
+            // Message channels.
+            // http://www.w3.org/TR/webmessaging/#messagechannel
+                
+            // this, self are both references to the worker global scope
+            // onmessage == self.onmessage == this.onmessage
+
+            self.onmessage = function(e) {
+                switch(e.data){
+                case "START":
+                    run();
+                    break;
+                case "STOP":
+                    // 1 – from the main calling page by calling the terminate()
+                    // 2 – from the worker itself via the close()
+                    self.close();
+                    break;
+                default:
+                  ...
+                  break;
+                }
+            };
+            </pre>
+
+</section>
+
+<section>
+    <h3> Demo: Dedicated Web Worker</h3>
+</section>
+
+<section>
+    <br/>
+
+    <h3>Inline Workers</h3>
+
+    <p>
+        Create your worker script on the fly, or create a self-contained page
+        <span class="code">without</span> having to create separate worker file.
+        <br/>
+        <span class="code">"Inline"</span> your worker in the same HTML file as
+        your main logic by creating a <span class="code">BlobBuilder</span> and
+        appending the worker code as a string.
+        <br/><br/>
+        This is done using Blob URL. Blob URLs are unique and last until the document is unloaded.
+        In Chrome, there's a nice page to view all of the created blob URLs:
+        <a target="_blank" href="chrome://blob-internals/">chrome://blob-internals</a>
+    </p>
+</section>
+
+<section>
+    <h3>Inline Workers (Code)</h3>
+        <pre class="brush: javascript;">
+
+            // Chrome: window.WebKitBlobBuilder, FF: window.MozBlobBuilder
+            var blobBuilder = new BlobBuilder();
+            blobBuilder.append("onmessage = function(e) { postMessage( 'msg1' ); }");
+
+            // The next method creates a simple URL string which can be used to
+            // reference data stored in a DOM File or Blob object.
+
+            // Obtain a blob URL reference to our worker 'file'.
+            // Note: window.webkitURL.createObjectURL() in Chrome
+            var blobURL = window.URL.createObjectURL(blobBuilder.getBlob());
+
+            var worker = new Worker(blobURL);
+            worker.onmessage = function(e) {
+              // e.data == 'msg1'
+            };
+
+            // Start the worker.
+            worker.postMessage();
+
+            // when not needed nay more:
+            // Chrome: window.webkitURL.revokeObjectURL()
+            window.URL.revokeObjectURL(blobURL);
+
+        </pre>
+</section>
+
+<section>
+    <h3><a href="inlineWorker.html" target="_blank">Demo: Inline Web Worker</a></h3>
+
+</section>
+
+<section>
+    <h3>Shared Web Worker</h3>
+
+    <p>
+        Shared workers, once created <span class="code">any script</span> running in the same origin can obtain a
+        reference to that worker and communicate with it.
+        <br/><br/>
+        Unlike Dedicated web workers, SharedWorkers communicate via
+        a <span class="code">port</span> object and attach a message event handler. <br/>
+        <br/>
+        Before using the first <span class="code">postMessage()</span>
+        <br/>
+        you must call the port’s <span class="code">start()</span>.
+        <br/>
+        <br/>
+                
+        <span class="important">
+            Unlike dedicated worker shared worker will live until <span class="code">port.close()</span>
+            will be called, so its important to "release" them
+        </span>
+
+    </p>
+</section>
+
+<section>
+    <h3>Shared Web Worker (Main page)</h3>
+    <pre class="brush: javascript;">
+        // Creating a Shared Web Worker
+        var worker = new SharedWorker(...);
+
+        // In shared worker the communication is through port
+        worker.port.addEventListener("message", function(e) {
+            alert(e.data);
+        }, false);
+
+        // !! importnat: call start before post message
+        worker.port.start();
+
+        // post a message to the shared web worker
+        worker.port.postMessage({ msg: "Html5Fest" });
+
+    </pre>
+</section>
+
+<section>
+    <h3>Shared Web Worker ( sharedWorker.js )</h3>
+
+    <pre class="brush: javascript;">
+        // count active connections
+        var connections = 0;
+
+        // Instead of a single message processing function,
+        // the code here attaches multiple event listeners
+        self.addEventListener("connect", function (e) {
+
+            // On each connection the port is always the first
+            // (and only) port in the event ports list
+            var port = e.ports[0];
+            connections++;
+
+            // message listener
+            port.addEventListener("message", function (e) {
+                port.postMessage("Message: " + JSON.stringify(e.data) + ",
+                    (Port #" + connections + ")");
+            }, false);
+
+            // "Open" the port for communication
+            port.start();
+        }, false);
+    </pre>
+    <br/>
+    <br/>
+    <span class="important">
+        Shared Workers can communicate between browser windows or tabs using the
+        <span class="code">window.postMessage()</span>
+    </span>
+    <br/>
+
+</section>
+
+<section>
+    <h3><a href="SharedWorker.html" target="_blank">Demo: Shared Web Worker</a></h3>
+</section>
+
+<section>
+    <h1 class="files">File API</h1>
+</section>
+
+<section>
+    <h2>File API features</h2>
+    <ul>
+        <li>Import from the filesystem or the web.</li>
+        <li>Create new files from scratch.</li>
+        <li>Manipulate existing file data.</li>
+        <li>Store file data on the client.</li>
+        <li>Publish files back to the web.</li>
+    </ul>
+</section>
+<section>
+    <h3>Local files</h3>
+
+    <p>
+        The File API specification provides a standard way to interact with local files.
+    </p>
+    <br/>
+    <h4>API:</h4>
+
+    <p>
+        <span class="code">File</span> - an individual file; <br/>
+        <span class="code">FileList</span> - an array-like sequence of File objects.<br/>
+        <span class="code">Blob</span> - Allows for slicing a file into byte ranges.<br/>
+    </p>
+    <br/>
+    <h4>Additional features</h4>
+
+    <p>
+        <span class="code">FileReader</span> - used to asynchronously read a file (event handling)<br/>
+        <span class="code">Drag And Drop</span> - build in support for files Drag And Drop<br/>
+    </p>
+</section>
+
+<section>
+    <h3>Reading local files</h3>
+
+    <pre class="brush: html">
+        <input type="file" id="..." name="..." multiple webkitdirectory/>
+    </pre>
+    <br/>
+    <pre class="brush: javascript">
+        // Add the event listener to the input type="file"
+        document.getElementById('...').addEventListener('change',
+            function( e){
+
+                // FileList object. list of the selected files
+                var files = e.target.files;
+
+                // files is a FileList of File objects. List some properties.
+                var output = [];
+
+                // Extract the information we can from the files/folder
+                for (var i = 0, f; f = files[i]; i++) {
+                    // f.name
+                    // f.type
+                    // f.size
+                    // f.lastModifiedDate.toLocaleDateString()
+                }
+                ...
+            }
+        }, false);
+
+    </pre>
+
+</section>
+
+<section>
+    <h3>Local files (Drag and drop)</h3>
+
+    <output id="list1" class="small"></output>
+    <div id="drop_zone">Drop files here</div>
+
+    <script>
+        function handleFileSelect(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+
+            var files = evt.dataTransfer.files; // FileList object.
+
+            // files is a FileList of File objects. List some properties.
+            var output = [];
+            for (var i = 0, f; f = files[i]; i++) {
+                output.push('<li><strong>', f.name, '</strong> (', f.type || 'n/a', ') - ',
+                        f.size, ' bytes, last modified: ',
+                        f.lastModifiedDate.toLocaleDateString(), '</li>');
+            }
+            document.querySelector('#list1').innerHTML = '<ul>' + output.join('') + '</ul>';
+        }
+
+        function handleDragOver(evt) {
+            evt.stopPropagation();
+            evt.preventDefault();
+        }
+
+        // Setup the dnd listeners.
+        var dropZone = document.getElementById('drop_zone');
+        dropZone.addEventListener('dragover', handleDragOver, false);
+        dropZone.addEventListener('drop', handleFileSelect, false);
+    </script>
+</section>
+
+<section>
+    <h3><a href="file1.html">Demo: Read MP3 info</a></h3>
+
+    <h3><a href="file2.html">Demo: Read and play MP3 file </a></h3>
+
+    <h3>Data URL: <a
+            href="data:text/html,<textarea style='font:20pt Courier;outline:none;padding:10px;height:50%;width:100%;border:1px solid #ccc;border-radius:5px' placeholder='Add code here...'></textarea>">Open
+        inline html document</a></h3>
+</section>
+
+<section>
+    <h1 class="files">File System API</h1>
+</section>
+
+<section>
+
+
+</section>
+<section>
+    <h3>File System API</h3>
+
+    <h2>Opening the file system</h2>
+    <pre class="brush: javascript;">
+        window.requestFileSystem(
+          TEMPORARY,        // persistent vs. temporary storage
+          1024 * 1024,      // size (bytes) of needed space
+          initFs,           // success callback
+          opt_errorHandler  // opt. error callback, denial of access
+        );
+    </pre>
+</section>
+
+<section>
+    <h3>File System API</h3>
+
+    <h2>Fetching a file by name</h2>
+    <pre class="brush: javascript;">
+        function initFs(fs) {
+
+          fs.root.getFile('logFile.txt', {create: true}, function(fileEntry) {
+
+            // fileEntry.isFile == true
+            // fileEntry.name == 'logFile.txt'
+            // fileEntry.fullPath == '/logFile.txt'
+
+            // Get a File obj
+            fileEntry.file(function(file) { ... }, errorHandler);
+
+            // fileEntry.remove(function() {}, errorHandler);
+            // fileEntry.moveTo(...);
+            // fileEntry.copyTo(...);
+            // fileEntry.getParent(function(dirEntry) {}, errorHandler);
+
+          }, errorHandler);
+
+        }
+    </pre>
+</section>
+<section>
+    <h3>File System API</h3>
+
+    <h2>File System URLs ( filesystem: )</h2>
+    <pre class="brush: javascript;">
+        var img = document.createElement('img');
+
+        // filesystem:http://example.com/temporary/myfile.png
+        img.src = fileEntry.toURL();
+        document.body.appendChild(img);
+
+        // Retrieve a file by its filesystem URL:
+        window.resolveLocalFileSystemURL(img.src, function(fileEntry) { ... });
+        </pre>
+</section>
+
+<section>
+    <h3><a href="http://www.htmlfivewow.com/demos/terminal/terminal.html" target="_blank">File system API Demo</a></h3>
+
+</section>
+
+
+</div>
+
+<script src="js/slideshow.js"></script>
+<script src="js/jquery.min.js"></script>
+<script src="js/workersUtil.js"></script>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+
+
+</body>
+</html>

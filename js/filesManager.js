@@ -112,5 +112,5 @@ var FilesManager = function() {
  * Init the file manager whn teh page is fully loaded
  */
 $(document).ready(function() {
-    FilesManager.init();
+    //FilesManager.init();
 });
